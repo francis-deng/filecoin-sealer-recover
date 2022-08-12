@@ -19,6 +19,7 @@ package main
 import (
 	"github.com/froghub-io/filecoin-sealer-recover/export"
 	"github.com/froghub-io/filecoin-sealer-recover/recovery"
+	"github.com/froghub-io/filecoin-sealer-recover/storage"
 	logging "github.com/ipfs/go-log/v2"
 	"github.com/urfave/cli/v2"
 	"os"
@@ -36,6 +37,8 @@ func main() {
 		Commands: []*cli.Command{
 			recovery.RecoverCmd,
 			export.ExportsCmd,
+
+			storage.StorageCmd,
 		},
 	}
 
