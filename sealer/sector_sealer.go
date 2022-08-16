@@ -161,6 +161,10 @@ func (ssb *SectorSealer) AddPiece(ctx context.Context, id storage.SectorRef, sz 
 	} else {
 		pi, err = ssb.sb.AddPiece(ctx, id, []abi.UnpaddedPieceSize{existingPiecesSize}, sz, rs)
 	}
+	if err != nil {
+		return err
+	}
+
 	//piz := pinfo.Size
 	//paddedReader, err := shared.NewInflatorReader(rs, uint64(sz), piz)
 	//if err != nil {
