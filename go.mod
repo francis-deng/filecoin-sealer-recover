@@ -8,6 +8,9 @@ replace github.com/filecoin-project/lotus => ./extern/lotus
 
 require (
 	github.com/filecoin-project/go-address v0.0.6
+	github.com/filecoin-project/go-commp-utils v0.1.3
+	github.com/filecoin-project/go-fil-markets v1.20.1-v16-2
+	github.com/filecoin-project/go-paramfetch v0.0.4
 	github.com/filecoin-project/go-state-types v0.1.10
 	github.com/filecoin-project/lotus v1.16.1
 	github.com/filecoin-project/specs-storage v0.4.1
