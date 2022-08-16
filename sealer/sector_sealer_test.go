@@ -102,7 +102,7 @@ func TestAddAndReadPiece(t *testing.T){
 			panic(err)
 		}
 
-		t.Log("unsealed content: ", string(bz))
+		t.Log("unsealed content:", string(bz))
 		require.Equal(t, srcFileBytes, bz)
 	})
 }

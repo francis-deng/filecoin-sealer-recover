@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/filecoin-project/go-commp-utils/writer"
+	"github.com/filecoin-project/go-fil-markets/shared"
 	"github.com/filecoin-project/go-paramfetch"
 	"github.com/filecoin-project/go-state-types/abi"
 	prooftypes "github.com/filecoin-project/go-state-types/proof"
@@ -32,6 +33,8 @@ type SectorSealer struct {
 	sb *ffiwrapper.Sealer
 
 	ref *storage.SectorRef
+
+	dataSizes []abi.UnpaddedPieceSize
 
 	sectorSize abi.SectorSize
 	pieces []abi.PieceInfo
@@ -112,10 +115,11 @@ func (ssb *SectorSealer) AddPiece(ctx context.Context, id storage.SectorRef, sz 
 	)
 	ssize, err := id.ProofType.SectorSize()
 
-	//pinfo,err := getPieceInfo(rs)
+	pinfo,err := getPieceInfo(rs)
 	if err != nil {
 		return err
 	}
+	rs.Seek(0, io.SeekStart)
 
 	var offset abi.UnpaddedPieceSize
 	pieceSizes := make([]abi.UnpaddedPieceSize, len(ssb.pieces))
@@ -137,7 +141,7 @@ func (ssb *SectorSealer) AddPiece(ctx context.Context, id storage.SectorRef, sz 
 		ssb.pieces = make([]abi.PieceInfo, 0)
 	}
 
-	existingPiecesSize := ssb.ExistingPiecesSize(-1)
+	//existingPiecesSize := ssb.ExistingPiecesSize(-1)
 	pads, padLength := ffiwrapper.GetRequiredPadding(offset.Padded(), sz.Padded())
 	if offset.Padded()+padLength+sz.Padded() > abi.PaddedPieceSize(ssize) {
 		return xerrors.New("exceeding max sector-size")
@@ -156,24 +160,26 @@ func (ssb *SectorSealer) AddPiece(ctx context.Context, id storage.SectorRef, sz 
 		pieceSizes = append(pieceSizes, p.Unpadded())
 	}
 
-	if existingPiecesSize == 0 {
-		pi, err = ssb.sb.AddPiece(ctx, id, []abi.UnpaddedPieceSize{}, sz, rs)
-	} else {
-		pi, err = ssb.sb.AddPiece(ctx, id, []abi.UnpaddedPieceSize{existingPiecesSize}, sz, rs)
+	//if existingPiecesSize == 0 {
+	//	pi, err = ssb.sb.AddPiece(ctx, id, []abi.UnpaddedPieceSize{}, sz, rs)
+	//} else {
+	//	pi, err = ssb.sb.AddPiece(ctx, id, []abi.UnpaddedPieceSize{existingPiecesSize}, sz, rs)
+	//}
+	//if err != nil {
+	//	return err
+	//}
+
+	piz := pinfo.Size
+	paddedReader, err := shared.NewInflatorReader(rs, uint64(sz), piz)
+	if err != nil {
+		return err
 	}
+	pi, err = ssb.sb.AddPiece(ctx, id, pieceSizes, pinfo.Size, paddedReader)
 	if err != nil {
 		return err
 	}
 
-	//piz := pinfo.Size
-	//paddedReader, err := shared.NewInflatorReader(rs, uint64(sz), piz)
-	//if err != nil {
-	//	return err
-	//}
-	//pi, err = ssb.sb.AddPiece(ctx, id, pieceSizes, pinfo.Size, paddedReader)
-	//if err != nil {
-	//	return err
-	//}
+	ssb.dataSizes = append(ssb.dataSizes, sz)
 	ssb.pieces = append(ssb.pieces, pi)
 
 
@@ -327,7 +333,9 @@ func (ssb *SectorSealer) Unseal(ctx context.Context,si storage.SectorRef,index i
 		return []byte{}, err
 	}
 
-	bz = b.Bytes()
+	dataSize := uint64(ssb.dataSizes[index])
+	bz = b.Bytes()[:dataSize]
+
 	return
 }
 

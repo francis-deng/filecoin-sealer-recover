@@ -9,6 +9,25 @@ import (
 	"testing"
 )
 
+func TestInflation(t *testing.T) {
+	//f,err := os.Open("us2.txt")
+	//if err != nil {
+	//	panic(err)
+	//}
+	//defer f.Close()
+	//
+	//pinfo,err := getPieceInfo(rs)
+	//if err != nil {
+	//	return err
+	//}
+	//
+	//
+	//piz := pinfo.Size
+	//paddedReader, err := shared.NewInflatorReader(rs, uint64(sz), piz)
+	//if err != nil {
+	//	return err
+	//}
+}
 
 func TestCreateSector(t *testing.T){
 	var sealRand = abi.SealRandomness{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2}
